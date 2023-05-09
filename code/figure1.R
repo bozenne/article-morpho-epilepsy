@@ -3,9 +3,9 @@
 ## Author: Brice Ozenne
 ## Created: maj  1 2023 (17:55) 
 ## Version: 
-## Last-Updated: maj  1 2023 (18:45) 
+## Last-Updated: maj  9 2023 (10:52) 
 ##           By: Brice Ozenne
-##     Update #: 4
+##     Update #: 5
 ##----------------------------------------------------------------------
 ## 
 ### Commentary: 
@@ -68,7 +68,7 @@ figure1b <- figure1b + theme(legend.position = "bottom",
                              axis.line = element_line(size = 1.25),
                              axis.ticks = element_line(size = 2),
                              axis.ticks.length=unit(.25, "cm")) 
-figure1b <- figure1b + guides(fill = "none") + ylab("volume [mm3 TOFIX]") + xlab(NULL)
+figure1b <- figure1b + guides(fill = "none") + ylab("volume [mm3]") + xlab(NULL)
 figure1b
 
 figure1 <- ggarrange(figure1a,figure1b, common.legend = TRUE, widths = c(4,1.15))

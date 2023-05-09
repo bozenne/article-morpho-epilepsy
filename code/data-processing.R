@@ -3,9 +3,9 @@
 ## Author: Brice Ozenne
 ## Created: maj  1 2023 (17:49) 
 ## Version: 
-## Last-Updated: maj  1 2023 (17:54) 
+## Last-Updated: maj  9 2023 (10:58) 
 ##           By: Brice Ozenne
-##     Update #: 4
+##     Update #: 5
 ##----------------------------------------------------------------------
 ## 
 ### Commentary: 
@@ -54,7 +54,7 @@ dfMDD <- merge(x = as.data.frame(dfMDD0),
 ## convert group to factor with shorter names
 dfMDD$Group2 <- factor(dfMDD$Group,
                        levels = c( "MTLE-control", "MTLE-MDD-Post", "MTLE-MDD-Pre" ),
-                       labels = c("C","MDD-Post","MDD-Pre"))
+                       labels = c("C","MDD_Post","MDD_Pre"))
 
 ## rescale volume
 dfMDD$ipsi.khippo <- dfMDD$ipsi.hippo/1000
