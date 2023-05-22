@@ -3,9 +3,9 @@
 ## Author: Brice Ozenne
 ## Created: maj  1 2023 (17:49) 
 ## Version: 
-## Last-Updated: maj  9 2023 (10:58) 
+## Last-Updated: maj 22 2023 (12:10) 
 ##           By: Brice Ozenne
-##     Update #: 5
+##     Update #: 6
 ##----------------------------------------------------------------------
 ## 
 ### Commentary: 
@@ -61,7 +61,30 @@ dfMDD$ipsi.khippo <- dfMDD$ipsi.hippo/1000
 dfMDD$con.khippo <- dfMDD$con.hippo/1000
 dfMDD$kETIV <- dfMDD$ETIV/1000
 
-## quality check
+## remove observations with missing data
+dfMDD.NNA <- dfMDD[rowSums(is.na(dfMDD))==0,]
+
+dfMDD[rowSums(is.na(dfMDD))>0,]
+##          ID Age         Group ipsi.ofc ipsi.prec ipsi.fusi ipsi.mid.temp
+## 86 TLE_0244  31 MTLE-MDD-Post 2.688995     2.594     3.024         3.094
+## 88 TLE_0248  36 MTLE-MDD-Post 2.535657     2.434     2.698         2.810
+##    ipsi.ros.acc ipsi.pos.cc ipsi.sup.fron ipsi.ros.mid.fron ipsi.hippo
+## 86        3.256       2.885         2.933             2.479     4460.1
+## 88        2.646       2.734         2.823             2.445     4872.1
+##    ipsi.lat.ofc ipsi.med.ofc ipsi.cingulate ipsi.acc  con.ofc con.prec con.fusi
+## 86        2.775        2.566       2.880359 3.127730 2.613928    2.483    2.947
+## 88        2.646        2.364       2.735694 2.811378 2.433714    2.442    2.527
+##    con.mid.temp con.ros.acc con.pos.cc con.sup.fron con.ros.mid.fron con.hippo
+## 86        3.156       3.119      2.630        2.949            2.337    4364.0
+## 88        2.862       2.814      2.603        2.823            2.485    4866.3
+##    con.lat.ofc con.med.ofc con.cingulate  con.acc    ETIV ipsi.insula.c
+## 86        2.67       2.536      2.606611 2.762682 1278563            NA
+## 88        2.52       2.320      2.767578 2.827332 1513632            NA
+##    con.insula.c   Group2 ipsi.khippo con.khippo    kETIV
+## 86           NA MDD_Post      4.4601     4.3640 1278.563
+## 88           NA MDD_Post      4.8721     4.8663 1513.632
+
+## * quality check
 name.thickness <- c("ipsi.ofc", "ipsi.fusi", "ipsi.insula.c", "ipsi.ros.acc","ipsi.pos.cc")
 any(is.na(dfMDD[,name.thickness]))
 ## [1] TRUE
@@ -81,6 +104,7 @@ table(dfMDD$Group2, useNA = "always")
 ## * Export
 if(system("whoami",intern=TRUE)=="unicph\\hpl802"){
     saveRDS(dfMDD, file = file.path(path,"data","dfMDD.rds"))
+    saveRDS(dfMDD.NNA, file = file.path(path,"data","dfMDD-NNA.rds"))
 }
 ##----------------------------------------------------------------------
 ### data-processing.R ends here

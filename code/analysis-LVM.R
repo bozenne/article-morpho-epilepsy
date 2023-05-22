@@ -11,7 +11,7 @@ if(system("whoami",intern=TRUE)=="unicph\\hpl802"){
 }else{
     path <- ""
 }
-dfMDD <- readRDS(file.path(path,"data","dfMDD.rds"))
+dfMDD <- readRDS(file.path(path,"data","dfMDD-NNA.rds"))
 
 ## * 3- exploratory (univariate)
 
@@ -93,7 +93,10 @@ latent(mLVM.blueCO)<-~eta
 
 ## ** c) estimate the LVM
 dfMDD$Group2 <- relevel(dfMDD$Group2, "C")
+dfMDD.bis <- dfMDD
+dfMDD.bis$Group2 <- relevel(dfMDD$Group2, "MDD_Pre")
 
+## *** Ipsilateral
 ## NROW(dfMDD)
 eLVM0.blueIP <- estimate(mLVM0.blueIP, data=dfMDD)
 
@@ -102,6 +105,19 @@ eLVM.blueIP <- estimate(mLVM.blueIP, data = dfMDD,
 ## logLik(eLVM.blueIP)
 ## 'log Lik.' 159.1133 (df=27)
 
+summary(eLVM.blueIP)
+##                    Estimate Std. Error  Z-value   P-value   std.xy
+## eta~Group2MDD_Post -0.06599    0.02130 -3.09805  0.001948 -0.43040
+## eta~Group2MDD_Pre  -0.04309    0.01956 -2.20241   0.02764 -0.28514
+
+eLVM.blueIP.bis <- estimate(mLVM.blueIP, data = dfMDD.bis,
+                            control = list(constrain = TRUE, start = coef(eLVM0.blueIP)))
+summary(eLVM.blueIP.bis)
+##                    Estimate Std. Error  Z-value   P-value   std.xy
+## eta~Group2C         0.04309    0.01956  2.20241   0.02764  0.32310
+## eta~Group2MDD_Post -0.02290    0.02152 -1.06386    0.2874 -0.14936
+
+## *** contralateral
 eLVM0.blueCO <- estimate(mLVM0.blueCO, data = dfMDD)
 
 eLVM.blueCO <- estimate(mLVM.blueCO, data = dfMDD,
@@ -110,20 +126,33 @@ eLVM.blueCO <- estimate(mLVM.blueCO, data = dfMDD,
 ## logLik(eLVM.blueCO)
 ## 'log Lik.' 236.1798 (df=27)
 
+summary(eLVM.blueCO)
+##                    Estimate Std. Error  Z-value   P-value   std.xy
+## eta~Group2MDD_Post -0.09849    0.02402 -4.09985 4.134e-05 -0.53191
+## eta~Group2MDD_Pre  -0.04631    0.02195 -2.11001   0.03486 -0.25376
+
+eLVM.blueCO.bis <- estimate(mLVM.blueCO, data = dfMDD.bis,
+                            control = list(constrain = TRUE, start = coef(eLVM0.blueCO)))
+summary(eLVM.blueCO.bis)
+
+##                    Estimate Std. Error  Z-value   P-value   std.xy
+## eta~Group2C         0.04631    0.02195  2.11002   0.03486  0.28754
+## eta~Group2MDD_Post -0.05218    0.02512 -2.07749   0.03776 -0.28180
+
 ## ** d) model diagnostic
 ## LVM assumes a somehow similar group effect across regions
 ##             a flexible but not fully unstructured correlation pattern         
 ## test missing links (e.g. region-specific group effect or complex correlation pattern)
 modelsearch(eLVM.blueIP)
- ## 7.852    0.005076  ipsi.ofc~~Group2MDDP        0.4873  0.05753
- ## 7.852    0.005076  ipsi.ofc~Group2MDDP         0.4873  0.05753
- ## 7.852    0.005076  Group2MDDP~ipsi.ofc         0.4873  0.05753
- ## 7.93     0.004862  ipsi.pos.cc~~kETIV          0.4813  0.05753
- ## 7.93     0.004862  ipsi.pos.cc~kETIV           0.4813  0.05753
- ## 7.93     0.004862  kETIV~ipsi.pos.cc           0.4813  0.05753
- ## 11.11    0.0008597 ipsi.insula.c~~kETIV        0.08769 0.02923
- ## 11.11    0.0008597 ipsi.insula.c~kETIV         0.08769 0.02923
- ## 11.11    0.0008597 kETIV~ipsi.insula.c         0.08769 0.02923
+ ## 7.354     0.006693 ipsi.ofc~~Group2MDD_Pre       0.6425 0.07585
+ ## 7.354     0.006693 ipsi.ofc~Group2MDD_Pre        0.6425 0.07585
+ ## 7.354     0.006693 Group2MDD_Pre~ipsi.ofc        0.6425 0.07585
+ ## 7.411     0.006484 ipsi.pos.cc~~kETIV            0.6419 0.07585
+ ## 7.411     0.006484 ipsi.pos.cc~kETIV             0.6419 0.07585
+ ## 7.411     0.006484 kETIV~ipsi.pos.cc             0.6419 0.07585
+ ## 10.52     0.001178 ipsi.insula.c~~kETIV          0.1202 0.04007
+ ## 10.52     0.001178 ipsi.insula.c~kETIV           0.1202 0.04007
+ ## 10.52     0.001178 kETIV~ipsi.insula.c           0.1202 0.04007
 ##set.seed(10) ## fix initial conditions for random draw
 
 par(mfrow = c(2,3))
@@ -132,13 +161,12 @@ xx <- lapply(endogenous(eLVM.blueIP), function(iName){ ## iName <- endogenous(eL
 })
 
 modelsearch(eLVM.blueCO)
- ## 6.875    0.008739 con.ofc~~con.insula.c     0.8652 0.1486
- ## 6.875    0.008739 con.ofc~con.insula.c      0.8652 0.1486
- ## 6.875    0.008739 con.insula.c~con.ofc      0.8652 0.1486
- ## 7.413    0.006475 con.insula.c~~con.khippo  0.6604 0.1486
- ## 7.413    0.006475 con.insula.c~con.khippo   0.6604 0.1486
- ## 7.413    0.006475 con.khippo~con.insula.c   0.6604 0.1486
-
+ ## 6.526     0.01063  con.ofc~~con.insula.c        1      0.1807
+ ## 6.526     0.01063  con.ofc~con.insula.c         1      0.1807
+ ## 6.526     0.01063  con.insula.c~con.ofc         1      0.1807
+ ## 7.038     0.007979 con.insula.c~~con.khippo     0.8139 0.1807
+ ## 7.038     0.007979 con.insula.c~con.khippo      0.8139 0.1807
+ ## 7.038     0.007979 con.khippo~con.insula.c      0.8139 0.1807
 par(mfrow = c(2,3))
 xx <- lapply(endogenous(eLVM.blueCO), function(iName){ ## iName <- endogenous(eLVM.blueIP)[1]
     qqtest(na.omit(residuals(eLVM.blueCO)[,iName]), main = iName)
@@ -154,16 +182,16 @@ regression(mLVM.blueIP2) <- ipsi.ofc~Group2
 eLVM.blueIP2 <- estimate(mLVM.blueIP2, data = dfMDD,
                          control = list(constrain = TRUE, start = coef(eLVM.blueIP)))
 modelsearch(eLVM.blueIP2)
-## 4.286    0.03843   ipsi.ros.acc~~kETIV           1       0.4099 
-## 4.286    0.03843   ipsi.ros.acc~kETIV            1       0.4099 
-## 4.286    0.03843   kETIV~ipsi.ros.acc            1       0.4099 
-## 8.337    0.003885  ipsi.pos.cc~~kETIV            0.3613  0.06216
-## 8.337    0.003885  ipsi.pos.cc~kETIV             0.3613  0.06216
-## 8.337    0.003885  kETIV~ipsi.pos.cc             0.3613  0.06216
-## 11.6     0.0006586 ipsi.insula.c~~kETIV          0.06322 0.02107
-## 11.6     0.0006586 ipsi.insula.c~kETIV           0.06322 0.02107
-## 11.6     0.0006586 kETIV~ipsi.insula.c           0.06322 0.02107
-
+ ## 2.988     0.0839    kETIV~eta                     1       0.662  
+ ## 3.862     0.0494    ipsi.ros.acc~~kETIV           1       0.527  
+ ## 3.862     0.0494    ipsi.ros.acc~kETIV            1       0.527  
+ ## 3.862     0.0494    kETIV~ipsi.ros.acc            1       0.527  
+ ## 7.8       0.005224  ipsi.pos.cc~~kETIV            0.4858  0.08358
+ ## 7.8       0.005224  ipsi.pos.cc~kETIV             0.4858  0.08358
+ ## 7.8       0.005224  kETIV~ipsi.pos.cc             0.4858  0.08358
+ ## 11        0.0009121 ipsi.insula.c~~kETIV          0.08756 0.02919
+ ## 11        0.0009121 ipsi.insula.c~kETIV           0.08756 0.02919
+ ## 11        0.0009121 kETIV~ipsi.insula.c           0.08756 0.02919
 compare(eLVM.blueIP,eLVM.blueIP2)
 ## chisq = 17.276, df = 2, p-value = 0.0001773
 ## sample estimates:
@@ -178,9 +206,9 @@ eLVM.blueCO2 <- estimate(mLVM.blueCO2, data = dfMDD,
                          control = list(constrain = TRUE, start = coef(eLVM.blueCO)))
 
 modelsearch(eLVM.blueCO2)
-## 5.447    0.01961 con.ofc~~con.insula.c        1    0.2282
-## 5.447    0.01961 con.ofc~con.insula.c         1    0.2282
-## 5.447    0.01961 con.insula.c~con.ofc         1    0.2282
+ ## 5.144     0.02333 con.ofc~~con.insula.c        1    0.2685
+ ## 5.144     0.02333 con.ofc~con.insula.c         1    0.2685
+ ## 5.144     0.02333 con.insula.c~con.ofc         1    0.2685
 
 
 compare(eLVM.blueCO,eLVM.blueCO2)
@@ -200,22 +228,21 @@ saveRDS(eLVM.blueCO2, file = file.path(path,"data","lvm-blueCO2.rds"))
 ## * 6- Connectivity
 ## testing whether there is at all a difference in connectivity or global binding between depression groups
 
+dfMDD.scale <- dfMDD[rowSums(is.na(dfMDD))==0,]
 
-dfMDD.NNA <- dfMDD[rowSums(is.na(dfMDD))==0,]
+dfMDD.scale$ipsi.ofc <- scale(dfMDD.scale$ipsi.ofc)
+dfMDD.scale$ipsi.fusi <- scale(dfMDD.scale$ipsi.fusi)
+dfMDD.scale$ipsi.insula.c <- scale(dfMDD.scale$ipsi.insula.c)
+dfMDD.scale$ipsi.ros.acc <- scale(dfMDD.scale$ipsi.ros.acc)
+dfMDD.scale$ipsi.pos.cc <- scale(dfMDD.scale$ipsi.pos.cc)
+dfMDD.scale$ipsi.khippo <- scale(dfMDD.scale$ipsi.khippo)
 
-dfMDD.NNA$ipsi.ofc <- scale(dfMDD.NNA$ipsi.ofc)
-dfMDD.NNA$ipsi.fusi <- scale(dfMDD.NNA$ipsi.fusi)
-dfMDD.NNA$ipsi.insula.c <- scale(dfMDD.NNA$ipsi.insula.c)
-dfMDD.NNA$ipsi.ros.acc <- scale(dfMDD.NNA$ipsi.ros.acc)
-dfMDD.NNA$ipsi.pos.cc <- scale(dfMDD.NNA$ipsi.pos.cc)
-dfMDD.NNA$ipsi.khippo <- scale(dfMDD.NNA$ipsi.khippo)
-
-dfMDD.NNA$con.ofc <- scale(dfMDD.NNA$con.ofc)
-dfMDD.NNA$con.fusi <- scale(dfMDD.NNA$con.fusi)
-dfMDD.NNA$con.insula.c <- scale(dfMDD.NNA$con.insula.c)
-dfMDD.NNA$con.ros.acc <- scale(dfMDD.NNA$con.ros.acc)
-dfMDD.NNA$con.pos.cc <- scale(dfMDD.NNA$con.pos.cc)
-dfMDD.NNA$con.khippo <- scale(dfMDD.NNA$con.khippo)
+dfMDD.scale$con.ofc <- scale(dfMDD.scale$con.ofc)
+dfMDD.scale$con.fusi <- scale(dfMDD.scale$con.fusi)
+dfMDD.scale$con.insula.c <- scale(dfMDD.scale$con.insula.c)
+dfMDD.scale$con.ros.acc <- scale(dfMDD.scale$con.ros.acc)
+dfMDD.scale$con.pos.cc <- scale(dfMDD.scale$con.pos.cc)
+dfMDD.scale$con.khippo <- scale(dfMDD.scale$con.khippo)
 
 ## ** a) define the LVM
 ## *** ipsi
@@ -409,13 +436,13 @@ latent(mLVM.strataCO.Dpre)<-~eta
 ## ** b) estimate the LVM
 ## *** ipsi
 ## sanity check
-eLVM.meanIP00 <- estimate(mLVM.meanIP0.HC, data = dfMDD.NNA, control = list(constrain = TRUE, trace = FALSE))
+eLVM.meanIP00 <- estimate(mLVM.meanIP0.HC, data = dfMDD.scale, control = list(constrain = TRUE, trace = FALSE))
 ## summary(eLVM.meanIP00)
 logLik(eLVM.meanIP00)
 ## 'log Lik.' -668.0951 (df=20)
 
 eLVM.meanIP0 <- estimate(list(mLVM.meanIP0.HC,mLVM.meanIP0.Dpost,mLVM.meanIP0.Dpre), 
-                        data = split(dfMDD.NNA, dfMDD.NNA$Group),
+                        data = split(dfMDD.scale, dfMDD.scale$Group),
                         control = list(constrain = TRUE, trace = FALSE))
 ## summary(eLVM.meanIP0)
 logLik(eLVM.meanIP0)
@@ -425,11 +452,11 @@ logLik(eLVM.meanIP0)
 ## mean model
 mLVM.meanIP.bis <- mLVM.meanIP.HC
 regression(mLVM.meanIP.bis) <- eta ~ Group
-logLik(estimate(mLVM.meanIP.bis, data = dfMDD.NNA, control = list(constrain = TRUE, trace = FALSE)))
+logLik(estimate(mLVM.meanIP.bis, data = dfMDD.scale, control = list(constrain = TRUE, trace = FALSE)))
 ## 'log Lik.' -655.7329 (df=27)
 
 eLVM.meanIP <- estimate(list(mLVM.meanIP.HC,mLVM.meanIP.Dpost,mLVM.meanIP.Dpre), 
-                        data = split(dfMDD.NNA, dfMDD.NNA$Group),
+                        data = split(dfMDD.scale, dfMDD.scale$Group),
                         control = list(constrain = TRUE, trace = FALSE, start = coef(eLVM.meanIP0)))
 ## summary(eLVM.meanIP)
 logLik(eLVM.meanIP)
@@ -437,30 +464,23 @@ logLik(eLVM.meanIP)
 
 ## connectivity model
 eLVM.strataIP <- estimate(list(mLVM.strataIP.HC,mLVM.strataIP.Dpost,mLVM.strataIP.Dpre), 
-                        data = split(dfMDD.NNA, dfMDD.NNA$Group),
+                        data = split(dfMDD.scale, dfMDD.scale$Group),
                         control = list(constrain = TRUE, trace = FALSE, start = coef(eLVM.meanIP)))
 ## summary(eLVM.meanIP)
 logLik(eLVM.strataIP)
-## 'log Lik.' -655.7329 (df=27)
-
-lava::compare(eLVM.strataIP, eLVM.meanIP)
-## data:  
-## chisq = 22.353, df = 12, p-value = 0.03375
-## sample estimates:
-## log likelihood (model 1) log likelihood (model 2) 
-##                -644.5564                -655.7329 
+## 'log Lik.' -644.5564 (df=39)
 
 
 ## *** contralateral
 
 ## sanity check
-eLVM.meanCO00 <- estimate(mLVM.meanCO0.HC, data = dfMDD.NNA, control = list(constrain = TRUE, trace = FALSE))
+eLVM.meanCO00 <- estimate(mLVM.meanCO0.HC, data = dfMDD.scale, control = list(constrain = TRUE, trace = FALSE))
 ## summary(eLVM.meanCO00)
 logLik(eLVM.meanCO00)
 ## 'log Lik.' -655.9556 (df=20)
 
 eLVM.meanCO0 <- estimate(list(mLVM.meanCO0.HC,mLVM.meanCO0.Dpost,mLVM.meanCO0.Dpre), 
-                        data = split(dfMDD.NNA, dfMDD.NNA$Group),
+                        data = split(dfMDD.scale, dfMDD.scale$Group),
                         control = list(constrain = TRUE, trace = FALSE))
 ## summary(eLVM.meanCO0)
 logLik(eLVM.meanCO0)
@@ -470,11 +490,11 @@ logLik(eLVM.meanCO0)
 ## mean model
 mLVM.meanCO.bis <- mLVM.meanCO.HC
 regression(mLVM.meanCO.bis) <- eta ~ Group
-logLik(estimate(mLVM.meanCO.bis, data = dfMDD.NNA, control = list(constrain = TRUE, trace = FALSE)))
+logLik(estimate(mLVM.meanCO.bis, data = dfMDD.scale, control = list(constrain = TRUE, trace = FALSE)))
 ## 'log Lik.' -633.0835 (df=27)
 
 eLVM.meanCO <- estimate(list(mLVM.meanCO.HC,mLVM.meanCO.Dpost,mLVM.meanCO.Dpre), 
-                        data = split(dfMDD.NNA, dfMDD.NNA$Group),
+                        data = split(dfMDD.scale, dfMDD.scale$Group),
                         control = list(constrain = TRUE, trace = FALSE, start = coef(eLVM.meanCO0)))
 ## summary(eLVM.meanCO)
 logLik(eLVM.meanCO)
@@ -482,7 +502,7 @@ logLik(eLVM.meanCO)
 
 ## connectivity model
 eLVM.strataCO <- estimate(list(mLVM.strataCO.HC,mLVM.strataCO.Dpost,mLVM.strataCO.Dpre), 
-                        data = split(dfMDD.NNA, dfMDD.NNA$Group),
+                        data = split(dfMDD.scale, dfMDD.scale$Group),
                         control = list(constrain = TRUE, trace = FALSE, start = coef(eLVM.meanCO)))
 ## summary(eLVM.meanCO)
 logLik(eLVM.strataCO)

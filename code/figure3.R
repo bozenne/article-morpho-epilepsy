@@ -3,9 +3,9 @@
 ## Author: Brice Ozenne
 ## Created: maj  9 2023 (18:57) 
 ## Version: 
-## Last-Updated: maj  9 2023 (19:08) 
+## Last-Updated: maj 22 2023 (12:08) 
 ##           By: Brice Ozenne
-##     Update #: 6
+##     Update #: 12
 ##----------------------------------------------------------------------
 ## 
 ### Commentary: 
@@ -90,6 +90,8 @@ tauCO.strata.DP <- coef(eLVM.strataCO)[paste0(latent(eLVM.strataCO),"~~",latent(
 ## resvarCO.strata.D <- lambdaCO.strata.D^2*tauCO.strata.D + sigmaCO.strata^2
 ## resvarCO.strata.DP <- lambdaCO.strata.DP^2*tauCO.strata.DP + sigmaCO.strata^2 ##
 
+## cov(Y_r,Y_r) = cov(\lambda_r \eta, \lambda_R \eta) = 
+
 rescovIP.strata.HC <- tcrossprod(lambdaIP.strata.HC)*tauIP.strata.HC + diag(sigmaIP.strata^2)
 rescovIP.strata.D <- tcrossprod(lambdaIP.strata.D)*tauIP.strata.D + diag(sigmaIP.strata^2)
 rescovIP.strata.DP <- tcrossprod(lambdaIP.strata.DP)*tauIP.strata.DP + diag(sigmaIP.strata^2)
@@ -118,6 +120,7 @@ rescorCO.strata.DP <- cov2cor(rescovCO.strata.DP)
 dimnames(rescorCO.strata.DP) <- list(endogenous(eLVM.strataCO),endogenous(eLVM.strataCO))
 
 ## * 4- graphical display
+## ** by side
 figure3.1 <- ggarrange(ggHeatmap(rescorIP.strata.HC, plot = FALSE, add.text = "fill", round = 2, limits = c(-1,1), legend_title = "correlation\n (ipsilateral)")$plot + ggtitle("Control"),
                        ggHeatmap(rescorIP.strata.D, plot = FALSE, add.text = "fill", round = 2, limits = c(-1,1))$plot + ggtitle("De novo MDD"),
                        ggHeatmap(rescorIP.strata.DP, plot = FALSE, add.text = "fill", round = 2, limits = c(-1,1))$plot + ggtitle("Prevalent MDD"),
@@ -135,13 +138,55 @@ figure3.2 <- ggarrange(ggHeatmap(rescorCO.strata.HC, plot = FALSE, add.text = "f
                        ggHeatmap(rescorCO.strata.DP-rescorCO.strata.HC, plot = FALSE, add.text = "fill", round = 2, limits = c(-1,1))$plot + ggtitle("Prevalent MDD vs. control"),
                        common.legend = TRUE, legend = "bottom", nrow = 2, ncol = 3)
 ## figure3.2
- 
+
+## ** both side at once
+df.cor <- rbind(
+    cbind(side = "Ipsilateral", group = "TLE-HC", ggHeatmap(rescorIP.strata.HC, plot = FALSE, add.text = "fill", round = 2)$data),
+    cbind(side = "Ipsilateral", group = "TLE-DN", ggHeatmap(rescorIP.strata.D, plot = FALSE, add.text = "fill", round = 2)$data),
+    cbind(side = "Ipsilateral", group = "TLE-DP", ggHeatmap(rescorIP.strata.DP, plot = FALSE, add.text = "fill", round = 2)$data),
+    cbind(side = "Contralateral", group = "TLE-HC", ggHeatmap(rescorCO.strata.HC, plot = FALSE, add.text = "fill", round = 2)$data),
+    cbind(side = "Contralateral", group = "TLE-DN", ggHeatmap(rescorCO.strata.D, plot = FALSE, add.text = "fill", round = 2)$data),
+    cbind(side = "Contralateral", group = "TLE-DP", ggHeatmap(rescorCO.strata.DP, plot = FALSE, add.text = "fill", round = 2)$data)
+    )
+    
+df.cor$group <- factor(df.cor$group, unique(df.cor$group))
+df.cor$x <- gsub("^ipsi.|^con.","",df.cor$x)
+
+df.cor$y <- gsub("^ipsi.|^con.","",df.cor$y)
+df.cor$x2 <- factor(df.cor$x, 
+                    levels = unique(df.cor$x))
+df.cor$y2 <- factor(df.cor$y, 
+                    levels = rev(unique(df.cor$y)))
+## labels = c("orbital frontal cortex","fusiform","insula","rostral anterior cingulate","posterior cingulate cortex","hippocampus","latent variable")
+
+## figure3.3
+figure3.3 <- ggplot2::ggplot(df.cor, aes(x = x2, y = y2))
+figure3.3 <- figure3.3 + ggplot2::geom_tile(aes(fill = fill))
+figure3.3 <- figure3.3 + ggplot2::labs(x = NULL, y = NULL, fill = "correlation")
+figure3.3 <- figure3.3 + ggplot2::facet_grid(side~group)
+## figure3.3 <- figure3.3 + ggplot2::scale_y_discrete(limits = rev(levels(data[["y"]])))
+figure3.3 <- figure3.3 + ggplot2::scale_fill_gradient2(low = "blue", mid = "white", high = "red",
+                                                       limits = c(-1,1), midpoint = 0)
+figure3.3 <- figure3.3 + ggplot2::geom_text(aes(x = x2, y = y2, label = add.text))
+
+
+figure3.3 <- figure3.3 + ggplot2::theme(text = element_text(size = 20), 
+                                        axis.text.x = element_text(angle = 60, hjust = 1),
+                                        legend.key.height = unit(0.1, "npc"), 
+                                        legend.key.width = unit(0.05, "npc"))
+figure3.3
+
+
 ## * 5- export
 ggsave(figure3.1, filename = file.path(path,"figures","figure3.1.pdf"), width = 15, height = 10)
-ggsave(figure3.2, filename = file.path(path,"figures","figure3.1.png"), width = 15, height = 10)
+ggsave(figure3.1, filename = file.path(path,"figures","figure3.1.png"), width = 15, height = 10)
 
-ggsave(figure3.1, filename = file.path(path,"figures","figure3.2.pdf"), width = 15, height = 10)
+ggsave(figure3.2, filename = file.path(path,"figures","figure3.2.pdf"), width = 15, height = 10)
 ggsave(figure3.2, filename = file.path(path,"figures","figure3.2.png"), width = 15, height = 10)
+
+ggsave(figure3.3, filename = file.path(path,"figures","figure3.3.pdf"), width = 15, height = 10)
+ggsave(figure3.3, filename = file.path(path,"figures","figure3.3.png"), width = 15, height = 10)
+
 
 ##----------------------------------------------------------------------
 ### figure3.R ends here

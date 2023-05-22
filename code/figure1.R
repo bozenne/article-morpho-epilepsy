@@ -3,13 +3,15 @@
 ## Author: Brice Ozenne
 ## Created: maj  1 2023 (17:55) 
 ## Version: 
-## Last-Updated: maj  9 2023 (10:52) 
+## Last-Updated: maj 22 2023 (11:41) 
 ##           By: Brice Ozenne
-##     Update #: 5
+##     Update #: 7
 ##----------------------------------------------------------------------
 ## 
 ### Commentary: 
-## 
+## Patients with a presurgical history of depression were coined TLE-DP,
+## whereas those without a presurgical history of depression who developed de novo depression after surgery were coined TLE-DN.
+## Finally, patients without any lifetime psychiatric history (pre – and postsurgical) were defined as TLE-HC.
 ### Change Log:
 ##----------------------------------------------------------------------
 ## 
@@ -18,6 +20,7 @@
 ## * 1- load packages
 library(ggplot2)
 library(data.table)
+library(ggpubr)
 
 ## * 2- load data
 if(system("whoami",intern=TRUE)=="unicph\\hpl802"){  
@@ -25,7 +28,7 @@ if(system("whoami",intern=TRUE)=="unicph\\hpl802"){
 }else{
     path <- ""
 }
-dfMDD.rds <- readRDS(file.path(path,"data","dfMDD.rds"))
+dfMDD <- readRDS(file.path(path,"data","dfMDD-NNA.rds"))
 
 ## * 3- reshape data in the log format for graphical display
 ## IPSI
@@ -47,7 +50,9 @@ dfMDD.long.con$region <- factor(dfMDD.long.con$variable,
 
 ## Assemble
 data.figure1 <- rbind(dfMDD.long.ipsi,dfMDD.long.con)
-data.figure1$Depression <- factor(data.figure1$Group, levels = c("MTLE-control","MTLE-MDD-Post","MTLE-MDD-Pre"), labels = c("Control","De Novo\nMDD","Prevalent\nMDD"))
+data.figure1$Depression <- factor(data.figure1$Group,
+                                  levels = c("MTLE-control","MTLE-MDD-Post","MTLE-MDD-Pre"),
+                                  labels = c("TLE-C","TLE-DN","TLE-DP"))
 
 
 ## * 4- graphical display
@@ -75,8 +80,8 @@ figure1 <- ggarrange(figure1a,figure1b, common.legend = TRUE, widths = c(4,1.15)
 figure1
 
 ## * 5- export
-ggsave(figure1, filename = file.path(path,"figures","figure1.pdf"), width = 15)
-ggsave(figure1, filename = file.path(path,"figures","figure1.png"), width = 15)
+ggsave(figure1, filename = file.path(path,"figures","figure1.pdf"), width = 14)
+ggsave(figure1, filename = file.path(path,"figures","figure1.png"), width = 14)
 
 
 ##----------------------------------------------------------------------

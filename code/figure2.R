@@ -3,9 +3,9 @@
 ## Author: Brice Ozenne
 ## Created: maj  1 2023 (18:14) 
 ## Version: 
-## Last-Updated: maj  9 2023 (10:57) 
+## Last-Updated: maj 22 2023 (12:12) 
 ##           By: Brice Ozenne
-##     Update #: 5
+##     Update #: 8
 ##----------------------------------------------------------------------
 ## 
 ### Commentary: 
@@ -27,7 +27,7 @@ if(system("whoami",intern=TRUE)=="unicph\\hpl802"){
 }else{
     path <- ""
 }
-dfMDD <- readRDS(file.path(path,"data","dfMDD.rds"))
+dfMDD <- readRDS(file.path(path,"data","dfMDD-NNA.rds"))
 eLVM.blueIP <- readRDS(file.path(path,"data","lvm-blueIP.rds"))
 eLVM.blueCO <- readRDS(file.path(path,"data","lvm-blueCO.rds"))
 
@@ -68,8 +68,12 @@ adj.dfMDD.long.con$region <- factor(adj.dfMDD.long.con$variable,
 
 
 data.figure2 <- rbind(adj.dfMDD.long.con, adj.dfMDD.long.ipsi)
-data.figure2$Depression <- factor(data.figure2$Group, levels = c("MTLE-control","MTLE-MDD-Post","MTLE-MDD-Pre"), labels = c("Control","De Novo\nMDD","Prevalent\nMDD"))
-
+data.figure2$Depression <- factor(data.figure2$Group,
+                                  levels = c("MTLE-control","MTLE-MDD-Post","MTLE-MDD-Pre"),
+                                  labels = c("TLE-C","TLE-DN","TLE-DP"))
+## TLEC --> Controls
+## TLEDN --> De novo depression
+## TLEDP --> prevalent depression
 ## * 4- graphical display
 figure2a <- ggplot(data.figure2[data.figure2$region %in% c("hippocampus","latent variable")==FALSE], aes(y=value, x = Depression, fill = Depression)) + geom_boxplot()
 figure2a <- figure2a + facet_grid(hemisphere~region)
@@ -102,8 +106,8 @@ figure2 <- ggarrange(figure2a,figure2b,figure2c, common.legend = TRUE, widths = 
 figure2
 
 ## * 5- export
-ggsave(figure2, filename = file.path(path,"figures","figure2.pdf"), width = 17)
-ggsave(figure2, filename = file.path(path,"figures","figure2.png"), width = 17)
+ggsave(figure2, filename = file.path(path,"figures","figure2.pdf"), width = 16)
+ggsave(figure2, filename = file.path(path,"figures","figure2.png"), width = 16)
 
 
 ##----------------------------------------------------------------------

@@ -3,9 +3,9 @@
 ## Author: Brice Ozenne
 ## Created: maj  1 2023 (18:37) 
 ## Version: 
-## Last-Updated: maj  9 2023 (17:58) 
+## Last-Updated: maj 22 2023 (12:12) 
 ##           By: Brice Ozenne
-##     Update #: 9
+##     Update #: 11
 ##----------------------------------------------------------------------
 ## 
 ### Commentary: 
@@ -55,7 +55,6 @@ if(system("whoami",intern=TRUE)=="unicph\\hpl802"){
 }else{
     path <- ""
 }
-dfMDD <- readRDS(file.path(path,"data","dfMDD.rds"))
 eLVM.blueIP <- readRDS(file.path(path,"data","lvm-blueIP.rds"))
 eLVM.blueCO <- readRDS(file.path(path,"data","lvm-blueCO.rds"))
 
@@ -151,6 +150,8 @@ table22 #### WARNING not adjusted for multiple comparisons over regions (6 compa
 ## 23:  MDD_Pre  con   pos.cc  -0.0148   mm  [-0.0403 ;0.0106] 0.2530342
 ## 24:  MDD_Pre  con   khippo  -0.0266  mm3  [-0.0789 ;0.0257] 0.3192979
 ##        Group Side   Region Estimate Unit             95% CI   p-value
+
+
 
 ## * 5- export
 keep.cols <- c("Region","Estimate","Unit","95% CI","p-value")
